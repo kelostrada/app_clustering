@@ -11,12 +11,13 @@ defmodule AppClustering do
   @spec group_apps(map(), float()) :: list(list(String.t()))
   def group_apps(apps_data, threshold) do
     apps_data
-    |> Enum.into(%{}, fn {id, paths} -> {id, MapSet.new(paths)} end)
     |> cluster_apps(threshold)
     |> Enum.sort_by(&length(&1), :desc)
   end
 
-  def cluster_apps(apps, threshold) do
+  defp cluster_apps(apps, threshold) do
+    apps = Enum.into(apps, %{}, fn {id, paths} -> {id, MapSet.new(paths)} end)
+
     apps
     |> Enum.reduce({apps, [], []}, fn {id, paths}, {remaining_apps, acc, handled_ids} ->
       if id in handled_ids do

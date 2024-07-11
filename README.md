@@ -1,21 +1,5 @@
 # AppClustering
 
-**TODO: Add description**
+You can run the task by using given classifier sample file:
 
-## Installation
-
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `app_clustering` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:app_clustering, "~> 0.1.0"}
-  ]
-end
-```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/app_clustering>.
-
+    $ mix cluster_apps priv/classifier-sample.json -t 0.7
