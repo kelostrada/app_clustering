@@ -23,4 +23,12 @@ defmodule AppClusteringTest do
       assert result == expected_result
     end
   end
+
+  test "returns empty list when given empty input" do
+    apps_data = %{}
+    threshold = 0.5
+
+    result = AppClustering.group_apps(apps_data, threshold)
+    assert result == []
+  end
 end

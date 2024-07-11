@@ -11,25 +11,32 @@ defmodule AppClustering do
   @spec group_apps(map(), float()) :: list(list(String.t()))
   def group_apps(apps_data, threshold) do
     apps_data
+    |> Enum.into(%{}, fn {id, paths} -> {id, MapSet.new(paths)} end)
     |> cluster_apps(threshold)
     |> Enum.sort_by(&length(&1), :desc)
   end
 
   def cluster_apps(apps, threshold) do
     apps
-    |> Similarity.create_matrix()
-    |> Enum.group_by(
-      fn {{id1, _}, _} -> id1 end,
-      fn {{_id1, id2}, similarity} -> {id2, similarity} end
-    )
-    |> Enum.reduce(MapSet.new(), fn {id, similarities}, acc ->
-      cluster =
-        similarities
-        |> Enum.filter(fn {_id, similarity} -> similarity >= threshold end)
-        |> Enum.map(&elem(&1, 0))
+    |> Enum.reduce({apps, [], []}, fn {id, paths}, {remaining_apps, acc, handled_ids} ->
+      if id in handled_ids do
+        {remaining_apps, acc, handled_ids}
+      else
+        cluster = find_cluster(paths, remaining_apps, threshold)
 
-      MapSet.put(acc, MapSet.new([id | cluster]))
+        remaining_apps = Map.drop(remaining_apps, cluster)
+        acc = [cluster | acc]
+        handled_ids = handled_ids ++ cluster
+
+        {remaining_apps, acc, handled_ids}
+      end
     end)
-    |> Enum.map(&MapSet.to_list/1)
+    |> elem(1)
+  end
+
+  defp find_cluster(paths, remaining_apps, threshold) do
+    remaining_apps
+    |> Enum.filter(fn {_, paths2} -> Similarity.ratio(paths, paths2) >= threshold end)
+    |> Enum.map(&elem(&1, 0))
   end
 end

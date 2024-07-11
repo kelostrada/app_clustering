@@ -35,7 +35,7 @@ defmodule Mix.Tasks.ClusterApps do
         |> File.read!()
         |> Jason.decode!()
         |> AppClustering.group_apps(threshold)
-        |> Jason.encode!()
+        |> Jason.encode!(pretty: true)
         |> Mix.shell().info()
 
       _ ->
