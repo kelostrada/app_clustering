@@ -3,17 +3,22 @@ defmodule AppClustering.Similarity do
   Context for finding similarities in paths
   """
 
-  def create_matrix(apps) do
-    apps = Enum.map(apps, fn {id, paths} -> {id, MapSet.new(paths)} end)
+  @doc """
+  Naive ratio calculation for paths. Takes all paths into consideration from two
+  sources and returns the ratio of the same common paths.
 
-    for {id1, paths1} <- apps, {id2, paths2} <- apps, id1 != id2, into: %{} do
-      {{id1, id2}, ratio(paths1, paths2)}
-    end
-  end
-
-  def ratio(paths1, paths2) do
+  Perhaps worth considering the size of the intersection as a next step. For instance
+  one source could have a lot of additional code but still use the same common paths
+  for the whitelabeled app.
+  """
+  @spec ratio(MapSet.t(), MapSet.t()) :: float()
+  def ratio(%MapSet{} = paths1, %MapSet{} = paths2) do
     common_paths_size = paths1 |> MapSet.intersection(paths2) |> MapSet.size()
     all_paths_size = paths1 |> MapSet.union(paths2) |> MapSet.size()
-    common_paths_size / all_paths_size
+    if all_paths_size > 0 do
+      common_paths_size / all_paths_size
+    else
+      0.0
+    end
   end
 end
